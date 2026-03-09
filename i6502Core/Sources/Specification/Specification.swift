@@ -108,8 +108,8 @@ public enum AddressingMode: Hashable, Sendable {
 }
 
 public struct Operation: Hashable, Sendable {
-    let symbol: OperationCode
-    let mode: AddressingMode
+    public let symbol: OperationCode
+    public let mode: AddressingMode
 
     public init(_ symbol: OperationCode, _ mode: AddressingMode) {
         self.symbol = symbol
@@ -127,6 +127,194 @@ public struct Operation: Hashable, Sendable {
         case .indirect: 3
         case .relative: 2
         case .implied, .accumulator: 1
+        }
+    }
+}
+
+extension Operation {
+    public var baseTiming: Int? {
+        switch (symbol, mode) {
+        case (.adc, .immediate): 2
+        case (.adc, .zeroPage): 3
+        case (.adc, .zeroPageX): 4
+        case (.adc, .absolute): 4
+        case (.adc, .absoluteX): 4
+        case (.adc, .absoluteY): 4
+        case (.adc, .indirectX): 6
+        case (.adc, .indirectY): 5
+
+        case (.and, .immediate): 2
+        case (.and, .zeroPage): 3
+        case (.and, .zeroPageX): 4
+        case (.and, .absolute): 4
+        case (.and, .absoluteX): 4
+        case (.and, .absoluteY): 4
+        case (.and, .indirectX): 6
+        case (.and, .indirectY): 5
+
+        case (.asl, .accumulator): 2
+        case (.asl, .zeroPage): 5
+        case (.asl, .zeroPageX): 6
+        case (.asl, .absolute): 6
+        case (.asl, .absoluteX): 7
+
+        case (.bit, .zeroPage): 3
+        case (.bit, .absolute): 4
+
+        case (.bpl, .relative): 2
+        case (.bmi, .relative): 2
+        case (.bvc, .relative): 2
+        case (.bvs, .relative): 2
+        case (.bcc, .relative): 2
+        case (.bcs, .relative): 2
+        case (.bne, .relative): 2
+        case (.beq, .relative): 2
+
+        case (.brk, .implied): 7
+
+        case (.cmp, .immediate): 2
+        case (.cmp, .zeroPage): 3
+        case (.cmp, .zeroPageX): 4
+        case (.cmp, .absolute): 4
+        case (.cmp, .absoluteX): 4
+        case (.cmp, .absoluteY): 4
+        case (.cmp, .indirectX): 6
+        case (.cmp, .indirectY): 5
+
+        case (.cpx, .immediate): 2
+        case (.cpx, .zeroPage): 3
+        case (.cpx, .absolute): 4
+
+        case (.cpy, .immediate): 2
+        case (.cpy, .zeroPage): 3
+        case (.cpy, .absolute): 4
+
+        case (.dec, .zeroPage): 5
+        case (.dec, .zeroPageX): 6
+        case (.dec, .absolute): 6
+        case (.dec, .absoluteX): 7
+
+        case (.eor, .immediate): 2
+        case (.eor, .zeroPage): 3
+        case (.eor, .zeroPageX): 4
+        case (.eor, .absolute): 4
+        case (.eor, .absoluteX): 4
+        case (.eor, .absoluteY): 4
+        case (.eor, .indirectX): 6
+        case (.eor, .indirectY): 5
+
+        case (.clc, .implied): 2
+        case (.sec, .implied): 2
+        case (.cli, .implied): 2
+        case (.sei, .implied): 2
+        case (.clv, .implied): 2
+        case (.cld, .implied): 2
+        case (.sed, .implied): 2
+
+        case (.inc, .zeroPage): 5
+        case (.inc, .zeroPageX): 6
+        case (.inc, .absolute): 6
+        case (.inc, .absoluteX): 7
+
+        case (.jmp, .absolute): 3
+        case (.jmp, .indirect): 5
+
+        case (.jsr, .absolute): 6
+
+        case (.lda, .immediate): 2
+        case (.lda, .zeroPage): 3
+        case (.lda, .zeroPageX): 4
+        case (.lda, .absolute): 4
+        case (.lda, .absoluteX): 4
+        case (.lda, .absoluteY): 4
+        case (.lda, .indirectX): 6
+        case (.lda, .indirectY): 5
+
+        case (.ldx, .immediate): 2
+        case (.ldx, .zeroPage): 3
+        case (.ldx, .zeroPageY): 4
+        case (.ldx, .absolute): 4
+        case (.ldx, .absoluteY): 4
+
+        case (.ldy, .immediate): 2
+        case (.ldy, .zeroPage): 3
+        case (.ldy, .zeroPageX): 4
+        case (.ldy, .absolute): 4
+        case (.ldy, .absoluteX): 4
+
+        case (.lsr, .accumulator): 2
+        case (.lsr, .zeroPage): 5
+        case (.lsr, .zeroPageX): 6
+        case (.lsr, .absolute): 6
+        case (.lsr, .absoluteX): 7
+
+        case (.nop, .implied): 2
+
+        case (.ora, .immediate): 2
+        case (.ora, .zeroPage): 3
+        case (.ora, .zeroPageX): 4
+        case (.ora, .absolute): 4
+        case (.ora, .absoluteX): 4
+        case (.ora, .absoluteY): 4
+        case (.ora, .indirectX): 6
+        case (.ora, .indirectY): 5
+
+        case (.tax, .implied): 2
+        case (.txa, .implied): 2
+        case (.dex, .implied): 2
+        case (.inx, .implied): 2
+        case (.tay, .implied): 2
+        case (.tya, .implied): 2
+        case (.dey, .implied): 2
+        case (.iny, .implied): 2
+
+        case (.rol, .accumulator): 2
+        case (.rol, .zeroPage): 5
+        case (.rol, .zeroPageX): 6
+        case (.rol, .absolute): 6
+        case (.rol, .absoluteX): 7
+
+        case (.ror, .accumulator): 2
+        case (.ror, .zeroPage): 5
+        case (.ror, .zeroPageX): 6
+        case (.ror, .absolute): 6
+        case (.ror, .absoluteX): 7
+
+        case (.rti, .implied): 6
+        case (.rts, .implied): 6
+
+        case (.sbc, .immediate): 2
+        case (.sbc, .zeroPage): 3
+        case (.sbc, .zeroPageX): 4
+        case (.sbc, .absolute): 4
+        case (.sbc, .absoluteX): 4
+        case (.sbc, .absoluteY): 4
+        case (.sbc, .indirectX): 6
+        case (.sbc, .indirectY): 5
+
+        case (.sta, .zeroPage): 3
+        case (.sta, .zeroPageX): 4
+        case (.sta, .absolute): 4
+        case (.sta, .absoluteX): 5
+        case (.sta, .absoluteY): 5
+        case (.sta, .indirectX): 6
+        case (.sta, .indirectY): 6
+
+        case (.txs, .implied): 2
+        case (.tsx, .implied): 2
+        case (.pha, .implied): 3
+        case (.pla, .implied): 4
+        case (.php, .implied): 3
+        case (.plp, .implied): 4
+
+        case (.stx, .zeroPage): 3
+        case (.stx, .zeroPageY): 4
+        case (.stx, .absolute): 4
+
+        case (.sty, .zeroPage): 3
+        case (.sty, .zeroPageX): 4
+        case (.sty, .absolute): 4
+        default: nil
         }
     }
 }

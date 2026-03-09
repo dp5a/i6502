@@ -38,9 +38,8 @@ i6502 app is featuring a live-reload 6502 assembly editor optimized for iPad and
 
 ### Emulator tab TBD features:
 * Bytecode disassembler with debugger 
+* Detachable virtual chips and devices (randomizer, keyboard, display, ...) that reserve RAM addresses 
 * RAM table monitor ($0000..$FFFF)
-* Pixel display, corresponding for RAM section
-* Keyboard and possibly other controls
 
 *very self-confident*
 
@@ -48,5 +47,6 @@ i6502 app is featuring a live-reload 6502 assembly editor optimized for iPad and
 
 * [Easy 6502](https://skilldrick.github.io/easy6502/) - smooth and short introduction to 6502 plus VERY useful playground
 * [6502.org](https://www.6502.org/tutorials/6502opcodes.html) - table of official operation codes with comprehensive description
+* [obelisk.me.uk](https://web.archive.org/web/20210626024532/http://www.obelisk.me.uk/6502/registers.html) - brief description of 6502 CPU registers
 * [emulationonline.com](https://www.emulationonline.com/systems/nes/) - series of articles about NES emulation that based on 6502 architecture
 * [nesdev.org](https://www.nesdev.org/wiki/NES_reference_guide) - NES-related wiki 
