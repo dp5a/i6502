@@ -27,26 +27,31 @@ let package = Package(
         .executableTarget(
             name: "i6502CLI",
             dependencies: ["i6502Assembler", "i6502Emulator"],
-            path: "Sources/Main"
+            path: "Sources/Main",
+            swiftSettings: [.enableUpcomingFeature("MemberImportVisibility")]
         ),
         .target(
             name: "i6502Assembler",
             dependencies: ["i6502Specification"],
-            path: "Sources/Assembler"
+            path: "Sources/Assembler",
+            swiftSettings: [.enableUpcomingFeature("MemberImportVisibility")]
         ),
         .target(
             name: "i6502Emulator",
             dependencies: ["i6502Specification"],
-            path: "Sources/Emulator"
+            path: "Sources/Emulator",
+            swiftSettings: [.enableUpcomingFeature("MemberImportVisibility")]
         ),
         .target(
             name: "i6502Specification",
-            path: "Sources/Specification"
+            path: "Sources/Specification",
+            swiftSettings: [.enableUpcomingFeature("MemberImportVisibility")]
         ),
         .testTarget(
             name: "i6502Tests",
             dependencies: ["i6502Specification", "i6502Assembler"],
-            path: "Tests"
+            path: "Tests",
+            swiftSettings: [.enableUpcomingFeature("MemberImportVisibility")]
         )
     ]
 )

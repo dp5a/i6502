@@ -6,28 +6,28 @@ struct ButtonsView: View {
 
     var body: some View {
         HStack(spacing: 20) {
-            Color(red: 157 / 255.0, green: 35 / 255.0, blue: 45 / 255.0)
-                .opacity(0.8)
-                .backgroundiOSSpecific()
-                .frame(width: 120, height: 120)
-                .contentShape(.circle)
-                .clipShape(Circle())
-                .onTapGesture(perform: reset)
-                .overlay(
-                    Circle().strokeBorder(Color.white.opacity(0.2))
-                )
+            Button {
+                reset()
+            } label: {}
+                .buttonStyle(RedButtonStyle())
 
-            Color(red: 157 / 255.0, green: 35 / 255.0, blue: 45 / 255.0)
-                .opacity(0.8)
-                .backgroundiOSSpecific()
-                .frame(width: 120, height: 120)
-                .contentShape(.circle)
-                .clipShape(Circle())
-                .onTapGesture(perform: action)
-                .overlay(
-                    Circle().strokeBorder(Color.white.opacity(0.2))
-                )
+            Button {
+                action()
+            } label: {}
+                .buttonStyle(RedButtonStyle())
         }
+    }
+}
+
+private struct RedButtonStyle: ButtonStyle {
+    func makeBody(configuration: Configuration) -> some View {
+        Color(red: 157 / 255.0, green: 35 / 255.0, blue: 45 / 255.0)
+            .opacity(0.8)
+            .backgroundiOSSpecific()
+            .contentShape(.circle)
+            .clipShape(.circle)
+            .overlay(Circle().strokeBorder(Color.white.opacity(0.2)))
+            .scaleEffect(configuration.isPressed ? CGSize(width: 0.92, height: 0.92) : CGSize(width: 1, height: 1))
     }
 }
 

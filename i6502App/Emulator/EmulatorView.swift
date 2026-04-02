@@ -41,10 +41,10 @@ struct EmulatorView: View {
     @State private var showInspector: Bool = false
 
     let cyclesPerFrame = 16_667 // 1 MHz
-    let program: [UInt8]
+    let memory: [UInt8?]
 
-    init(program: [UInt8]) {
-        self.program = program
+    init(memory: [UInt8?]) {
+        self.memory = memory
 
         monitor = Array(repeating: 0, count: 1_024)
         keyboard = KeyboardDevice()
@@ -57,11 +57,13 @@ struct EmulatorView: View {
 
     var body: some View {
         GeometryReader { proxy in
-            let pixelSize = min(proxy.size.width, proxy.size.height) / 32
+            let minSize = min(proxy.size.width, proxy.size.height)
+            let pixelSize = minSize / 32
 
             ZStack {
                 appTheme.palette.backgroundPrimary.ignoresSafeArea()
-
+            }
+            .overlay(alignment: .top) {
                 TimelineView(.animation) { timeline in
                     Canvas { context, _ in
                         for i in 0 ..< 1_024 {
@@ -91,7 +93,7 @@ struct EmulatorView: View {
                     .onChange(of: timeline.date) {
                         if reset {
                             emulator = Emulator(
-                                program: program,
+                                memory: memory,
                                 emulationMode: .instructionAccurate,
                                 devices: [randomizer, keyboard]
                             )
@@ -109,6 +111,7 @@ struct EmulatorView: View {
             }
             .overlay(alignment: .bottomLeading) {
                 DpadView { keyboard.pressed = $0 }
+                    .frame(width: min(300, minSize / 2), height: min(300, minSize / 2))
                     .padding()
             }
             .overlay(alignment: .bottomTrailing) {
@@ -116,8 +119,13 @@ struct EmulatorView: View {
                     reset: { reset = true },
                     action: {}
                 )
+                .frame(width: minSize / 3, height: minSize / 4)
                 .padding()
             }
         }
     }
+}
+
+#Preview {
+    EmulatorView(memory: [])
 }

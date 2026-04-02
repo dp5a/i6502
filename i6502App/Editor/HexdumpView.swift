@@ -11,7 +11,7 @@ struct HexdumpOverlayView: View {
 
     var body: some View {
         HexdumpView(originalText: originalText)
-            .frame(minWidth: 500, alignment: .topLeading)
+            .frame(width: 500, alignment: .topLeading)
             .backgroundiOSSpecific()
             .overlay(
                 RoundedRectangle(cornerRadius: 20)
@@ -46,12 +46,12 @@ private struct HexdumpView: View {
                 return "Enter operations to start"
             }
             return result
-        } catch let AssemblerError.preprocessorError(description) {
-            return AttributedString("Preprocessor error: \(description)")
+        } catch let AssemblerError.linkerError(description) {
+            return AttributedString("Linker error: \(description)")
         } catch let AssemblerError.tokenizerError(description) {
             return AttributedString("Tokenizer error: \(description)")
-        } catch let AssemblerError.compilerError(description) {
-            return AttributedString("Complier error: \(description)")
+        } catch let AssemblerError.translatorError(description) {
+            return AttributedString("Translator error: \(description)")
         } catch {
             return AttributedString("Unknown error!")
         }
@@ -82,22 +82,22 @@ private struct HexdumpView: View {
         }
     }
 
-    private func hexDump(_ bytes: [UInt8], rowSize: Int) -> AttributedString {
-        bytes
-            .enumerated()
-            .map { index, byte in
-                var newLine: AttributedString = ""
-                if index % rowSize == 0 {
-                    if index != 0 {
-                        newLine += "\n"
+    private func hexDump(_ bytes: [UInt8?], rowSize: Int) -> AttributedString {
+        var result = ""
+        for (rowIndex, row) in bytes.chunked(into: 16).enumerated() {
+            if !row.allSatisfy({ $0 == nil }) {
+                result += String(format: "%.4x: ", rowIndex * 16)
+                for col in row {
+                    if let col {
+                        result += String(format: "%.2x ", col)
+                    } else {
+                        result += "** "
                     }
-                    var address = AttributedString(String(format: "%.4x: ", 0x0600 + index))
-                    address.foregroundColor = appTheme.palette.comments
-                    newLine += address
                 }
-                return newLine + AttributedString(String(format: "%.2x", byte))
+                result += "\n"
             }
-            .reduce(into: "") { $0 += $1 + " " }
+        }
+        return AttributedString(result)
     }
 }
 
@@ -140,3 +140,11 @@ extension UIBlurEffect {
     }
 }
 #endif
+
+extension Array {
+    func chunked(into size: Int) -> [[Element]] {
+        stride(from: 0, to: count, by: size).map {
+            Array(self[$0 ..< Swift.min($0 + size, count)])
+        }
+    }
+}

@@ -8,59 +8,65 @@ struct DpadView: View {
     let onTap: (UInt8) -> Void
 
     var body: some View {
-        let center = CGPoint(x: 150, y: 150)
-        let offsetX = isPressed ? (pressPoint.x - center.x) / center.x : 0
-        let offsetY = isPressed ? (pressPoint.y - center.y) / center.y : 0
+        GeometryReader { proxy in
+            let center = CGPoint(x: proxy.size.width / 2, y: proxy.size.height / 2)
+            let offsetX = isPressed ? (pressPoint.x - center.x) / center.x : 0
+            let offsetY = isPressed ? (pressPoint.y - center.y) / center.y : 0
 
-        ZStack {
-            Circle()
-                .fill(Color.white.opacity(0.2))
-                .frame(width: 80)
-                .zIndex(10)
+            ZStack {
+                Circle()
+                    .strokeBorder(Color.white.opacity(0.2), lineWidth: 1)
+                    .frame(width: proxy.size.width * 0.95)
+                    .backgroundiOSSpecific()
 
-            Circle()
-                .strokeBorder(Color.white.opacity(0.2), lineWidth: 1)
-                .frame(width: 80)
-        }
-        .frame(width: 300, height: 300)
-        .background(
-            DpadShape()
-                .fill(appTheme.palette.backgroundPrimary.opacity(0.5))
-        )
-        .overlay(
-            DpadShape()
-                .strokeBorder(Color.white.opacity(0.2), lineWidth: 1)
-        )
-        .backgroundiOSSpecific()
-        .contentShape(DpadShape())
-        .rotation3DEffect(
-            .degrees(isPressed ? 6 : 0),
-            axis: (x: -offsetY, y: offsetX, z: 0),
-            perspective: 0.4
-        )
-        .scaleEffect(isPressed ? 0.98 : 1.0)
-        .animation(.spring(response: 0.15, dampingFraction: 0.6), value: isPressed)
-        .gesture(
-            DragGesture(minimumDistance: 0)
-                .onChanged { value in
-                    pressPoint = value.location
-                    isPressed = true
+                DpadShape()
+                    .fill(appTheme.palette.backgroundPrimary)
 
-                    if (0 ... 100).contains(value.location.y) {
-                        onTap(0x77) // up
-                    } else if (200 ... 300).contains(value.location.x) {
-                        onTap(0x64) // right
-                    } else if (200 ... 300).contains(value.location.y) {
-                        onTap(0x73) // down
-                    } else if (0 ... 100).contains(value.location.x) {
-                        onTap(0x61) // left
+                Circle()
+                    .fill(Color.white.opacity(0.2))
+                    .frame(width: proxy.size.width / 3 * 0.85)
+
+                Circle()
+                    .strokeBorder(Color.white.opacity(0.2), lineWidth: 1)
+                    .frame(width: proxy.size.width / 3 * 0.85)
+            }
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .overlay(
+                DpadShape()
+                    .strokeBorder(Color.white.opacity(0.2), lineWidth: 1)
+            )
+            .contentShape(DpadShape())
+            .rotation3DEffect(
+                .degrees(isPressed ? 6 : 0),
+                axis: (x: -offsetY, y: offsetX, z: 0),
+                perspective: 0.4
+            )
+            .scaleEffect(isPressed ? 0.98 : 1.0)
+            .animation(.spring(response: 0.15, dampingFraction: 0.6), value: isPressed)
+            .gesture(
+                DragGesture(minimumDistance: 0)
+                    .onChanged { value in
+                        pressPoint = value.location
+                        isPressed = true
+
+                        let third = proxy.size.width / 3
+
+                        if (0 ... third).contains(value.location.y) {
+                            onTap(0x77) // up
+                        } else if (2 * third ... proxy.size.width).contains(value.location.x) {
+                            onTap(0x64) // right
+                        } else if (2 * third ... proxy.size.height).contains(value.location.y) {
+                            onTap(0x73) // down
+                        } else if (0 ... third).contains(value.location.x) {
+                            onTap(0x61) // left
+                        }
                     }
-                }
-                .onEnded { _ in
-                    isPressed = false
-                }
-        )
-        .shadow(radius: 10)
+                    .onEnded { _ in
+                        isPressed = false
+                    }
+            )
+            .shadow(radius: 10)
+        }
     }
 }
 
@@ -72,7 +78,8 @@ struct DpadView: View {
         appTheme.palette.backgroundPrimary.ignoresSafeArea()
 
         DpadView(onTap: { _ in })
-            .border(.red)
+            .frame(width: 400, height: 400)
+        // .border(.red)
     }
 }
 
@@ -298,7 +305,7 @@ extension View {
         #if !os(macOS)
         .background(
             VisualEffectView(effect: UIBlurEffect.withRadius(3))
-                .clipShape(DpadShape())
+                .clipShape(Circle())
         )
         #endif
     }

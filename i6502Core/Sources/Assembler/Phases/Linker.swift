@@ -27,8 +27,9 @@ extension Linker {
             if case let .operation(operation) = token {
                 switch operation.argument {
                 case let .absolute(numberOrUsedLabel),
+                     let .absoluteY(numberOrUsedLabel),
                      let .absoluteX(numberOrUsedLabel),
-                     let .absoluteY(numberOrUsedLabel):
+                     let .indirect(numberOrUsedLabel):
 
                     if case let .label(string) = numberOrUsedLabel {
                         guard let address = labelAddresses[string] else {
@@ -37,30 +38,25 @@ extension Linker {
 
                         tokens[index] = .operation(.init(
                             code: operation.code,
-                            argument: .absolute(.number(.word(address))),
-                            address: operation.address
-                        ))
-                    }
-
-                case let .indirect(numberOrUsedLabel):
-                    if case let .label(string) = numberOrUsedLabel {
-                        guard let address = labelAddresses[string] else {
-                            throw AssemblerError.linkerError("label \"\(string)\" was not resolved")
-                        }
-
-                        tokens[index] = .operation(.init(
-                            code: operation.code,
-                            argument: .indirect(.number(.word(address))),
+                            argument: operation.argument.resolveReference(with: .word(address)),
                             address: operation.address
                         ))
                     }
 
                 case let .relative(.label(string)):
-                    guard let address = labelAddresses[string] else {
+                    guard let targetAddress = labelAddresses[string] else {
                         throw AssemblerError.linkerError("label \"\(string)\" was not resolved")
                     }
-                    let distance =
-                        UInt8(bitPattern: Int8(Int(address) - Int(operation.address) - Int(operation.byteLength)))
+
+                    let distanceValue = Int(targetAddress) - Int(operation.address) - Int(operation.byteLength)
+                    if !(-128 ... 127).contains(distanceValue) {
+                        throw AssemblerError
+                            .linkerError(
+                                "label \"\(string)\" declared \(distanceValue) bytes away which is outside the range of a relative branching"
+                            )
+                    }
+
+                    let distance = UInt8(bitPattern: Int8(distanceValue))
 
                     tokens[index] = .operation(.init(
                         code: operation.code,
@@ -77,51 +73,14 @@ extension Linker {
 }
 
 extension Token.Operation.Argument {
-    func toAddressingMode() -> AddressingMode {
+    fileprivate func resolveReference(with value: Token.Number) -> Self {
         switch self {
-        case .immediate: .immediate
-        case .zeroPage: .zeroPage
-        case .zeroPageX: .zeroPageX
-        case .zeroPageY: .zeroPageY
-        case .absolute: .absolute
-        case .absoluteX: .absoluteX
-        case .absoluteY: .absoluteY
-        case .indirectX: .indirectX
-        case .indirectY: .indirectY
-        case .indirect: .indirect
-        case .relative: .relative
-        case .implied: .implied
-        case .accumulator: .accumulator
-        }
-    }
-}
-
-extension Token.Operation.Argument {
-    var value: [UInt8] {
-        switch self {
-        case let .immediate(value): [value]
-        case let .zeroPage(value): [value]
-        case let .zeroPageX(value): [value]
-        case let .zeroPageY(value): [value]
-        case let .absolute(.number(number)): number.toBytecode()
-        case let .absoluteX(.number(number)): number.toBytecode()
-        case let .absoluteY(.number(number)): number.toBytecode()
-        case let .relative(.number(number)): number.toBytecode()
-        case let .indirectX(value): [value]
-        case let .indirectY(value): [value]
-        case let .indirect(.number(number)): number.toBytecode()
-        case .implied: []
-        case .accumulator: []
-        default: []
-        }
-    }
-}
-
-extension Token.Number {
-    func toBytecode() -> [UInt8] {
-        switch self {
-        case let .byte(value): [value]
-        case let .word(value): [UInt8(value & 0x00FF), UInt8((value & 0xFF00) >> 8)]
+        case .absolute: .absolute(.number(value))
+        case .absoluteX: .absoluteX(.number(value))
+        case .absoluteY: .absoluteY(.number(value))
+        case .indirect: .indirect(.number(value))
+        case .relative: .relative(.number(value))
+        default: self
         }
     }
 }

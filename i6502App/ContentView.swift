@@ -3,7 +3,6 @@ import SwiftUI
 
 struct ContentView: View {
     @AppStorage("AppTheme") private var appTheme: AppTheme = .defaultDark
-    @AppStorage("ForcedDarkMode") private var forcedDarkMode: Bool = false
     @State private var savedCode: String = Self.snakeGame
 
     var body: some View {
@@ -20,7 +19,7 @@ struct ContentView: View {
             }
             Tab("Emulator", systemImage: "display") {
                 NavigationStack {
-                    EmulatorView(program: (try? Assembler.compileBytes(input: savedCode)) ?? [])
+                    EmulatorView(memory: (try? Assembler.compileBytes(input: savedCode)) ?? [])
                 }
             }
         }

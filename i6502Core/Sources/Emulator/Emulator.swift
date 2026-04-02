@@ -36,7 +36,7 @@ public final class Emulator {
     }
 
     public init(
-        memory: [UInt8] = [0x00],
+        memory: [UInt8?] = [nil],
         emulationMode: EmulationMode = .instructionAccurate,
         devices: [PluggableDevice]
     ) {
@@ -92,14 +92,16 @@ public enum EmulatorError: Error {
 }
 
 extension Array {
-    fileprivate mutating func assign(at range: ClosedRange<Int>, _ value: Self) throws {
+    fileprivate mutating func assign(at range: ClosedRange<Int>, _ value: [Element?]) throws {
         guard range.count == value.count else {
             throw EmulatorError.deviceError(
                 "Device emittable addresses [\(range)] are not compatible with ram [0..65535]"
             )
         }
         for i in range {
-            self[i] = value[i - range.lowerBound]
+            if let value = value[i - range.lowerBound] {
+                self[i] = value
+            }
         }
     }
 }

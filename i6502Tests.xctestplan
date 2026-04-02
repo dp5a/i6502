@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "08B7E5DD-9746-463C-AE53-3668D2A1C065",
+      "name" : "Test Scheme Action",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "performanceAntipatternCheckerEnabled" : true
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:",
+        "identifier" : "i6502Tests",
+        "name" : "i6502Tests"
+      }
+    }
+  ],
+  "version" : 1
+}

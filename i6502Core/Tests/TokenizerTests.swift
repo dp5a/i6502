@@ -209,6 +209,19 @@ struct TokenizerTests {
         }
     }
 
+    @Test("\"label\" basic multiple")
+    func labelBasicMultiple() {
+        #expect(throws: Never.self, "parsed label without errors") {
+            let tokens = try Tokenizer.process(input: "labelone: labeltwo: labelthree:")
+            let expectedTokens: [Token] = [
+                .labelDeclaration(.init(name: "labelone", address: 0x0000)),
+                .labelDeclaration(.init(name: "labeltwo", address: 0x0000)),
+                .labelDeclaration(.init(name: "labelthree", address: 0x0000))
+            ]
+            #expect(tokens == expectedTokens, "tokens represent three label declarations")
+        }
+    }
+
     @Test("\"label\" underscore")
     func labelBasicUnderscore() {
         #expect(throws: Never.self, "parsed label without errors") {

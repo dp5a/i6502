@@ -6,7 +6,7 @@ struct EditorView: View {
     @AppStorage("FontSize") private var fontSize: Double = 14
     @State private var onSettings: Bool = false
 
-    @State private var _text: AttributedString = ""
+    @State private var _text: AttributedString?
     @State private var showInspector: Bool = true
 
     @Binding private var savedCode: String
@@ -19,7 +19,7 @@ struct EditorView: View {
     var body: some View {
         ZStack(alignment: .trailing) {
             TextEditor(text: .init(
-                get: { _text },
+                get: { _text ?? "" },
                 set: {
                     _text = applyHighlighting($0)
                     savedCode = String($0.characters)
@@ -29,7 +29,7 @@ struct EditorView: View {
             .keyboardIOSSpecific()
 
             if showInspector, UIDevice.current.userInterfaceIdiom != .phone {
-                HexdumpOverlayView(originalText: String(_text.characters))
+                HexdumpOverlayView(originalText: String(_text?.characters ?? .init()))
                     .transition(.move(edge: .trailing))
                     .padding([.trailing, .bottom], 12)
                     .ignoresSafeArea(.all, edges: [.trailing, .bottom])
@@ -66,7 +66,7 @@ struct EditorView: View {
         }
         .settingsSheet(isPresented: $onSettings)
         .onChange(of: appTheme) {
-            _text = applyHighlighting(_text)
+            _text = applyHighlighting(_text ?? "")
         }
     }
 

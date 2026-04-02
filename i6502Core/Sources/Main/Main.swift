@@ -17,12 +17,16 @@ struct Main {
         hexDump(bytecode)
     }
 
-    private static func hexDump(_ bytes: [UInt8]) {
+    private static func hexDump(_ bytes: [UInt8?]) {
         for (rowIndex, row) in bytes.chunked(into: 16).enumerated() {
             if !row.allSatisfy({ $0 == 0 }) {
                 print(String(format: "%.4x: ", rowIndex * 16), terminator: "")
                 for col in row {
-                    print(String(format: "%.2x ", col), terminator: "")
+                    if let col {
+                        print(String(format: "%.2x ", col), terminator: "")
+                    } else {
+                        print("** ", terminator: "")
+                    }
                 }
                 print()
             }
