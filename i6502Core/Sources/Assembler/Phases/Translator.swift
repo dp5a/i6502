@@ -1,3 +1,4 @@
+import Foundation
 import i6502Specification
 
 enum Translator {
@@ -8,10 +9,18 @@ enum Translator {
 
 extension Translator {
     fileprivate static func translateBytecode(tokens: [Token]) throws -> [UInt8?] {
-        var currentAddress: UInt16 = 0x0000
+        var currentAddress = 0x0000
         var memory = [UInt8?](repeating: nil, count: 65_536)
 
         for token in tokens {
+            if case .org = token {} else {
+                guard currentAddress < 65_536 else {
+                    throw AssemblerError.translatorError(
+                        "address \(String(format: "$%.4x", currentAddress)) is out of bounds"
+                    )
+                }
+            }
+
             switch token {
             case .labelDeclaration:
                 break
@@ -20,8 +29,19 @@ extension Translator {
                 memory[currentAddress] = byteValue
                 currentAddress += 1
 
+            case let .word(wordValue):
+                guard currentAddress < 65_535 else {
+                    throw AssemblerError.translatorError(
+                        "\".word\" on address \(String(format: "$%.4x", currentAddress)) is out of bounds"
+                    )
+                }
+                memory[currentAddress] = UInt8(wordValue & 0x00FF)
+                currentAddress += 1
+                memory[currentAddress] = UInt8((wordValue & 0xFF00) >> 8)
+                currentAddress += 1
+
             case let .org(address):
-                currentAddress = address
+                currentAddress = Int(address)
 
             case let .operation(operation):
                 let specOperation = i6502Specification.Operation(operation.code, operation.argument.toAddressingMode())
@@ -35,6 +55,9 @@ extension Translator {
                 currentAddress += 1
                 for item in try operation.argument.value() {
                     memory[currentAddress] = item
+                    currentAddress += 1
+                }
+                if operation.code == .brk {
                     currentAddress += 1
                 }
             }
@@ -64,8 +87,9 @@ extension Token.Operation.Argument {
              let .absoluteY(.label(label)),
              let .indirect(.label(label)),
              let .relative(.label(label)):
-            throw AssemblerError
-                .translatorError("unresolved label \"\(label)\" reference in \(toAddressingMode()) mode")
+            throw AssemblerError.translatorError(
+                "unresolved label \"\(label)\" reference in \(toAddressingMode()) mode"
+            )
         }
     }
 }

@@ -4,6 +4,9 @@ import UIKit
 
 // emits a random byte value
 class RandomizerDevice: PluggableDevice {
+    var irqRequired: Bool = false
+    var nmiRequired: Bool = false
+
     var addresses: ClosedRange<Int> = 0xFE ... 0xFE
     var lastEmitted: UInt8 = 0
 
@@ -17,6 +20,9 @@ class RandomizerDevice: PluggableDevice {
 
 // emits an ASCII value of currently pressed key
 class KeyboardDevice: PluggableDevice {
+    var irqRequired: Bool = false
+    var nmiRequired: Bool = false
+
     var addresses: ClosedRange<Int> = 0xFF ... 0xFF
     var pressed: UInt8? = nil
 
@@ -35,7 +41,7 @@ struct EmulatorView: View {
     @State private var randomizer: RandomizerDevice
     @State private var emulator: Emulator
 
-    @State private var reset: Bool = false
+    @State private var boot: Bool = false
     @State private var clock: Double = 0.7
 
     @State private var showInspector: Bool = false
@@ -91,13 +97,14 @@ struct EmulatorView: View {
                         maxSampleOffset: CGSize(width: 50, height: 50)
                     )
                     .onChange(of: timeline.date) {
-                        if reset {
+                        if boot {
                             emulator = Emulator(
                                 memory: memory,
                                 emulationMode: .instructionAccurate,
                                 devices: [randomizer, keyboard]
                             )
-                            reset = false
+                            emulator.reset()
+                            boot = false
                         } else {
                             // unthrottling CPU from 60Hz to 1MHz clock rate
                             for _ in 0 ..< cyclesPerFrame / 80 {
@@ -116,8 +123,8 @@ struct EmulatorView: View {
             }
             .overlay(alignment: .bottomTrailing) {
                 ButtonsView(
-                    reset: { reset = true },
-                    action: {}
+                    reset: { emulator.reset() },
+                    action: { boot = true }
                 )
                 .frame(width: minSize / 3, height: minSize / 4)
                 .padding()

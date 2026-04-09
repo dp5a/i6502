@@ -11,12 +11,18 @@ enum Tokenizer {
 extension Tokenizer {
     fileprivate static func processTokens(input: String) throws -> [Token] {
         var cursor = Cursor(input: input)
-        var currentAddress: UInt16 = 0x0000
+        var currentAddress = 0x0000
         var tokens: [Token] = []
         var defines: [String: Token.Number] = [:]
 
         input.takeAll(.whitespacesAndNewlines, cursor: &cursor)
         while cursor.globalPosition.utf16Offset(in: input) < input.count {
+            guard currentAddress < 65_536 else {
+                throw AssemblerError.tokenizerError(
+                    "address \(String(format: "$%.4x", currentAddress)) is out of bounds"
+                )
+            }
+
             if input.takeComment(cursor: &cursor) {
                 input.takeAll(.whitespacesAndNewlines, cursor: &cursor)
                 continue
@@ -26,16 +32,20 @@ extension Tokenizer {
 
             } else if let orgDirective = try input.takeOrgDirective(defines: defines, cursor: &cursor) {
                 tokens.append(.org(orgDirective))
-                currentAddress = orgDirective
+                currentAddress = Int(orgDirective)
 
             } else if let byteDirective = try input.takeByteDirective(defines: defines, cursor: &cursor) {
                 tokens.append(.byte(byteDirective))
                 currentAddress += 1
 
+            } else if let wordDirective = try input.takeWordDirective(defines: defines, cursor: &cursor) {
+                tokens.append(.word(wordDirective))
+                currentAddress += 1
+
             } else if let (_, code) = input.takeOperation(cursor: &cursor) {
                 let operation = try input.processOperation(
                     code: code,
-                    address: currentAddress,
+                    address: UInt16(currentAddress),
                     defines: defines,
                     cursor: &cursor
                 )
@@ -49,10 +59,13 @@ extension Tokenizer {
                 }
 
                 tokens.append(.operation(operation))
-                currentAddress += operation.byteLength
+                currentAddress += Int(operation.byteLength)
 
             } else {
-                let labelDeclaration = try input.processLabelDeclaration(address: currentAddress, cursor: &cursor)
+                let labelDeclaration = try input.processLabelDeclaration(
+                    address: UInt16(currentAddress),
+                    cursor: &cursor
+                )
                 tokens.append(.labelDeclaration(labelDeclaration))
             }
 
@@ -92,26 +105,30 @@ extension String {
                     if take(")", cursor: &cursor) == ")" {
                         takeAll(.whitespacesAndNewlines, cursor: &cursor)
                         guard !take(",", cursor: &cursor).isEmpty else {
-                            throw AssemblerError
-                                .tokenizerError("\(cursor): expected indirect,Y addressing mode for byte value")
+                            throw AssemblerError.tokenizerError(
+                                "\(cursor): expected indirect,Y addressing mode for byte value"
+                            )
                         }
                         takeAll(.whitespacesAndNewlines, cursor: &cursor)
                         guard !take("y", cursor: &cursor).isEmpty else {
-                            throw AssemblerError
-                                .tokenizerError("\(cursor): expected indirect,Y addressing mode for byte value")
+                            throw AssemblerError.tokenizerError(
+                                "\(cursor): expected indirect,Y addressing mode for byte value"
+                            )
                         }
                         return .init(code: code, argument: .indirectY(value), address: address)
                     }
                     if take(",", cursor: &cursor) == "," {
                         takeAll(.whitespacesAndNewlines, cursor: &cursor)
                         guard !take("x", cursor: &cursor).isEmpty else {
-                            throw AssemblerError
-                                .tokenizerError("\(cursor): expected indirect,X addressing mode for byte value")
+                            throw AssemblerError.tokenizerError(
+                                "\(cursor): expected indirect,X addressing mode for byte value"
+                            )
                         }
                         takeAll(.whitespacesAndNewlines, cursor: &cursor)
                         guard !take(")", cursor: &cursor).isEmpty else {
-                            throw AssemblerError
-                                .tokenizerError("\(cursor): expected indirect,X addressing mode for byte value")
+                            throw AssemblerError.tokenizerError(
+                                "\(cursor): expected indirect,X addressing mode for byte value"
+                            )
                         }
                         return .init(code: code, argument: .indirectX(value), address: address)
                     }
@@ -119,8 +136,9 @@ extension String {
 
                 case .word:
                     guard take(")", cursor: &cursor) == ")" else {
-                        throw AssemblerError
-                            .tokenizerError("\(cursor): expected indirect addressing mode for word value")
+                        throw AssemblerError.tokenizerError(
+                            "\(cursor): expected indirect addressing mode for word value"
+                        )
                     }
                     return .init(code: code, argument: .indirect(.number(tryNumber)), address: address)
                 }
@@ -353,6 +371,28 @@ extension String {
         }
         return nil
     }
+
+    fileprivate func takeWordDirective(defines: [String: Token.Number], cursor: inout Cursor) throws -> UInt16? {
+        var cursorCopy = cursor
+
+        let nextToken = takeUntil(.whitespacesAndNewlines, cursor: &cursorCopy)
+        if nextToken == ".word" {
+            takeAll(.whitespacesAndNewlines, cursor: &cursorCopy)
+            let argument = takeUntil(.whitespacesAndNewlines, cursor: &cursorCopy)
+
+            if case let .word(resolvedValue) = defines[argument] {
+                cursor = cursorCopy
+                return resolvedValue
+            }
+
+            guard case let .word(value) = try argument.parseNumber() else {
+                throw AssemblerError.tokenizerError("\(cursorCopy): expected a word literal after \".word\"")
+            }
+            cursor = cursorCopy
+            return value
+        }
+        return nil
+    }
 }
 
 extension String {
@@ -366,6 +406,10 @@ extension String {
         }
 
         if isHexidecimal {
+            guard value < 65_536 else {
+                throw AssemblerError.tokenizerError("number is outside of word ($0000..$FFFF) range")
+            }
+
             return count <= 3 ? .byte(UInt8(value)) : .word(UInt16(value))
         }
         if -128 ..< 256 ~= value {

@@ -1,5 +1,5 @@
 import Testing
-
+import i6502Specification
 @testable import i6502Assembler
 
 @Suite

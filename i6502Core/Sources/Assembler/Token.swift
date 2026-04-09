@@ -59,6 +59,7 @@ enum Token: Equatable {
     case labelDeclaration(Token.DeclaredLabel)
     case operation(Token.Operation)
     case byte(UInt8)
+    case word(UInt16)
     case org(UInt16)
 }
 

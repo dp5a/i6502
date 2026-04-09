@@ -9,6 +9,12 @@ public protocol PluggableDevice {
 
     // Called at the end of CPU cycle and recieves values from assigned section
     func recieve(section: [UInt8])
+
+    // Checked at the start of CPU cycle and performs IRQ chores if I flag is set
+    var irqRequired: Bool { get set }
+
+    // Checked at the start of CPU cycle and performs NMI chores
+    var nmiRequired: Bool { get set }
 }
 
 public enum EmulationMode {
@@ -21,19 +27,6 @@ public final class Emulator {
     public private(set) var state: StateImage = .init()
     public private(set) var devices: [PluggableDevice] = []
     private var remainingCycles: Int = 0
-
-    public init(
-        program: [UInt8],
-        emulationMode: EmulationMode = .instructionAccurate,
-        devices: [PluggableDevice]
-    ) {
-        if !program.isEmpty {
-            try? state.memory.assign(at: 0x600 ... 0x600 + program.count - 1, program)
-        }
-
-        self.emulationMode = emulationMode
-        self.devices = devices
-    }
 
     public init(
         memory: [UInt8?] = [nil],
@@ -57,30 +50,38 @@ public final class Emulator {
         }
     }
 
-    public func cycleInstructionAccurate() throws {
-        var nextState = state
+    // Emulates RESET pin activation
+    public func reset() {
+        remainingCycles = state.resetInstructionAccurate()
+    }
 
+    private func cycleInstructionAccurate() throws {
         // handle devices emits
         for device in devices {
-            try? nextState.memory.assign(at: device.addresses, device.emit())
+            try? state.memory.assign(at: device.addresses, device.emit())
         }
 
-        // emulate operation timings
+        // handle interrupts and operation execution on cycle #1
         if remainingCycles == 0 {
-            remainingCycles = try nextState.cycleInstructionAccurate()
+            if devices.contains(where: \.nmiRequired) {
+                remainingCycles = state.nmiInstructionAccurate()
+            } else if !state.registerPS.interrupt, devices.contains(where: \.irqRequired) {
+                remainingCycles = state.irqInstructionAccurate()
+            } else {
+                remainingCycles = try state.cycleInstructionAccurate()
+            }
         }
 
         // handle devices recieves
         for device in devices {
-            guard nextState.memory.indices.contains(device.addresses) else {
+            guard state.memory.indices.contains(device.addresses) else {
                 throw EmulatorError.deviceError(
                     "Device recieving addresses [\(device.addresses)] are not compatible with ram [0..65535]"
                 )
             }
-            device.recieve(section: Array(nextState.memory[device.addresses]))
+            device.recieve(section: Array(state.memory[device.addresses]))
         }
 
-        state = nextState
         remainingCycles -= 1
     }
 }
