@@ -5,10 +5,6 @@
 
 #include <stdint.h>
 
-void imp_t0(CpuState *state) {
-    (void)bus_read(state->bus, state->register_pc++);
-}
-
 /* MARK: - brk actions */
 
 void imp_brk_t1(CpuState *state) {
@@ -144,14 +140,13 @@ void imp_rti_t2(CpuState *state) {
 }
 
 void imp_rti_t3(CpuState *state) {
-    state->register_ps = bus_read(state->bus, 0x100 + state->register_sp++) & ~(S_MASK | B_MASK);
+    state->register_ps = (bus_read(state->bus, 0x100 + state->register_sp++) & ~B_MASK) | S_MASK;
 }
 
 void imp_rti_t4(CpuState *state) {
-    uint8_t pcl = bus_read(state->bus, 0x100 + state->register_sp);
+    uint8_t pcl = bus_read(state->bus, 0x100 + state->register_sp++);
 
     state->register_pc = (state->register_pc & 0xFF00) | pcl;
-    state->register_sp++;
 }
 
 void imp_rti_t5(CpuState *state) {
@@ -171,10 +166,9 @@ void imp_rts_t2(CpuState *state) {
 }
 
 void imp_rts_t3(CpuState *state) {
-    uint8_t pcl = bus_read(state->bus, 0x100 + state->register_sp);
+    uint8_t pcl = bus_read(state->bus, 0x100 + state->register_sp++);
 
     state->register_pc = (state->register_pc & 0xFF00) | pcl;
-    state->register_sp++;
 }
 
 void imp_rts_t4(CpuState *state) {
@@ -212,7 +206,7 @@ void imp_php_t1(CpuState *state) {
 }
 
 void imp_php_t2(CpuState *state) {
-    bus_write(state->bus, 0x100 + state->register_sp--, state->register_ps);
+    bus_write(state->bus, 0x100 + state->register_sp--, state->register_ps | B_MASK | S_MASK);
 }
 
 void imp_pla_t1(CpuState *state) {
@@ -237,5 +231,5 @@ void imp_plp_t2(CpuState *state) {
 }
 
 void imp_plp_t3(CpuState *state) {
-    state->register_ps = bus_read(state->bus, 0x100 + state->register_sp);
+    state->register_ps = (bus_read(state->bus, 0x100 + state->register_sp) & ~B_MASK) | S_MASK;
 }

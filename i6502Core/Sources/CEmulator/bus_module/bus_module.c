@@ -6,22 +6,25 @@
 /* MARK: - Bus initializer & deinitializer */
 
 BusState * bus_create() {
-    BusState *bus = malloc(sizeof(BusState));
+    BusState *state = malloc(sizeof(BusState));
+    if (!state) { return NULL; }
+
     for (size_t i = 0; i < 65536; ++i) {
-        bus->ram[i] = rand();
+        state->ram[i] = rand();
     }
+    return state;
 }
 
-void bus_destroy(BusState *bus) {
-    free(bus);
+void bus_destroy(BusState *state) {
+    free(state);
 }
 
 /* MARK: - Bus actions */
 
-uint8_t bus_read(BusState *bus, uint16_t address) {
-    return bus->ram[address];
+uint8_t bus_read(BusState *state, uint16_t address) {
+    return state->ram[address];
 }
 
-void bus_write(BusState *bus, uint16_t address, uint8_t value) {
-    bus->ram[address] = value;
+void bus_write(BusState *state, uint16_t address, uint8_t value) {
+    state->ram[address] = value;
 }

@@ -10,10 +10,10 @@ typedef struct {
 
 /* Bus initializer & deinitializer */
 BusState * bus_create();
-void bus_destroy(BusState *bus);
+void bus_destroy(BusState *state);
 
 /* Bus actions */
-uint8_t bus_read(BusState *bus, uint16_t address);
-void bus_write(BusState *bus, uint16_t address, uint8_t value);
+uint8_t bus_read(BusState *state, uint16_t address);
+void bus_write(BusState *state, uint16_t address, uint8_t value);
 
 #endif /* __bus_module_h_ */

@@ -13,6 +13,9 @@ typedef struct {
     uint8_t register_x;
     uint8_t register_y;
     BusState *bus;
+
+    uint8_t data_latch;
+    uint16_t address_latch;
 } CpuState;
 
 /* 6502 operation (like read, write, ALU, ..) */
@@ -26,7 +29,7 @@ typedef struct {
 
 /* 6502 initializer & deinitializer */
 CpuState * cpu_create();
-void cpu_destroy(CpuState *cpu);
+void cpu_destroy(CpuState *state);
 
 /* 6502 actions */
 CpuCycles cpu_decode(CpuState *state);

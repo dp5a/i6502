@@ -18,22 +18,19 @@ void nmi_t1(CpuState *state) {
 void nmi_t2(CpuState *state) {
     uint8_t pch = (state->register_pc & 0xFF00) >> 8;
 
-    bus_write(state->bus, 0x100 + state->register_sp, pch);
-    state->register_sp--;
+    bus_write(state->bus, 0x100 + state->register_sp--, pch);
 }
 
 void nmi_t3(CpuState *state) {
     uint8_t pcl = state->register_pc & 0x00FF;
 
-    bus_write(state->bus, 0x100 + state->register_sp, pcl);
-    state->register_sp--;
+    bus_write(state->bus, 0x100 + state->register_sp--, pcl);
 }
 
 void nmi_t4(CpuState *state) {
     uint8_t ps = (state->register_ps & ~B_MASK) | S_MASK;
 
-    bus_write(state->bus, 0x100 + state->register_sp, ps);
-    state->register_sp--;
+    bus_write(state->bus, 0x100 + state->register_sp--, ps);
 }
 
 void nmi_t5(CpuState *state) {
@@ -60,18 +57,15 @@ void reset_t1(CpuState *state) {
 }
 
 void reset_t2(CpuState *state) {
-    (void)bus_read(state->bus, 0x100 + state->register_sp);
-    state->register_sp--;
+    (void)bus_read(state->bus, 0x100 + state->register_sp--);
 }
 
 void reset_t3(CpuState *state) {
-    (void)bus_read(state->bus, 0x100 + state->register_sp);
-    state->register_sp--;
+    (void)bus_read(state->bus, 0x100 + state->register_sp--);
 }
 
 void reset_t4(CpuState *state) {
-    (void)bus_read(state->bus, 0x100 + state->register_sp);
-    state->register_sp--;
+    (void)bus_read(state->bus, 0x100 + state->register_sp--);
 }
 
 void reset_t5(CpuState *state) {
@@ -100,22 +94,19 @@ void irq_t1(CpuState *state) {
 void irq_t2(CpuState *state) {
     uint8_t pch = (state->register_pc & 0xFF00) >> 8;
 
-    bus_write(state->bus, 0x100 + state->register_sp, pch);
-    state->register_sp--;
+    bus_write(state->bus, 0x100 + state->register_sp--, pch);
 }
 
 void irq_t3(CpuState *state) {
     uint8_t pcl = state->register_pc & 0x00FF;
 
-    bus_write(state->bus, 0x100 + state->register_sp, pcl);
-    state->register_sp--;
+    bus_write(state->bus, 0x100 + state->register_sp--, pcl);
 }
 
 void irq_t4(CpuState *state) {
     uint8_t ps = (state->register_ps & ~B_MASK) | S_MASK;
 
-    bus_write(state->bus, 0x100 + state->register_sp, ps);
-    state->register_sp--;
+    bus_write(state->bus, 0x100 + state->register_sp--, ps);
 }
 
 void irq_t5(CpuState *state) {

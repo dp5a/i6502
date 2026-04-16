@@ -5,13 +5,24 @@
 
 #include <stdint.h>
 #include <stdlib.h>
+#include <time.h>
 
 /* MARK: - Emulator initializer & deinitializer */
 
 EmulatorState * emu_create() {
     EmulatorState *state = malloc(sizeof(EmulatorState));
+    if (!state) { return NULL; }
+
+    srand((unsigned)time(NULL));
+
     state->bus = bus_create();
     state->cpu = cpu_create();
+
+    if (!state->bus || !state->cpu) {
+        if (state->cpu) { cpu_destroy(state->cpu); }
+        if (state->bus) { bus_destroy(state->bus); }
+        free(state);
+    }
 
     state->cpu->bus = state->bus;
 
@@ -31,7 +42,8 @@ void emu_destroy(EmulatorState *state) {
 /* MARK: - Emulator actions */
 
 void emu_reset(EmulatorState *state) {
-    cpu_reset(state->cpu);
+    state->cpu_cycles = cpu_reset(state->cpu);
+    state->cpu_cycles_index = 0;
 }
 
 void emu_cycle(EmulatorState *state) {
@@ -39,6 +51,7 @@ void emu_cycle(EmulatorState *state) {
         CpuAction cpu_action = state->cpu_cycles.actions[state->cpu_cycles_index];
 
         cpu_action(state->cpu);
+        state->cpu_cycles_index++;
     } else {
         /* TODO: nmi and irq goes here */
 

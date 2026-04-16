@@ -31,7 +31,6 @@ void nmi_t5(CpuState *state);
 void nmi_t6(CpuState *state);
 
 /* MARK: - immediate actions */
-void imm_t0(CpuState *state);
 void imm_adc_t1(CpuState *state);
 void imm_sbc_t1(CpuState *state);
 void imm_and_t1(CpuState *state);
@@ -45,14 +44,12 @@ void imm_ldx_t1(CpuState *state);
 void imm_ldy_t1(CpuState *state);
 
 /* MARK: - accumulator actions */
-void acc_t0(CpuState *state);
 void acc_asl_t1(CpuState *state);
 void acc_lsr_t1(CpuState *state);
 void acc_rol_t1(CpuState *state);
 void acc_ror_t1(CpuState *state);
 
 /* MARK: - implied actions */
-void imp_t0(CpuState *state);
 void imp_brk_t1(CpuState *state);
 void imp_brk_t2(CpuState *state);
 void imp_brk_t3(CpuState *state);
@@ -97,5 +94,31 @@ void imp_pla_t3(CpuState *state);
 void imp_plp_t1(CpuState *state);
 void imp_plp_t2(CpuState *state);
 void imp_plp_t3(CpuState *state);
+
+/* MARK: - zero page actions */
+void zp_t1(CpuState *state);
+void zp_lda_t2(CpuState *state);
+void zp_ldx_t2(CpuState *state);
+void zp_ldy_t2(CpuState *state);
+void zp_adc_t2(CpuState *state);
+void zp_sbc_t2(CpuState *state);
+void zp_and_t2(CpuState *state);
+void zp_ora_t2(CpuState *state);
+void zp_eor_t2(CpuState *state);
+void zp_bit_t2(CpuState *state);
+void zp_cmp_t2(CpuState *state);
+void zp_cpx_t2(CpuState *state);
+void zp_cpy_t2(CpuState *state);
+void zp_sta_t2(CpuState *state);
+void zp_stx_t2(CpuState *state);
+void zp_sty_t2(CpuState *state);
+void zp_rmw_t2(CpuState *state);
+void zp_rmw_t4(CpuState *state);
+void zp_asl_t3(CpuState *state);
+void zp_lsr_t3(CpuState *state);
+void zp_rol_t3(CpuState *state);
+void zp_ror_t3(CpuState *state);
+void zp_inc_t3(CpuState *state);
+void zp_dec_t3(CpuState *state);
 
 #endif /* __cpu_actions_h_ */
