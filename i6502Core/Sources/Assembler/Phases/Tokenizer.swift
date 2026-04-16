@@ -18,17 +18,17 @@ extension Tokenizer {
 
         input.takeAll(.whitespacesAndNewlines, cursor: &cursor)
         while cursor.globalPosition < input.count {
-            guard currentAddress < 65_536 else {
-                throw AssemblerError.tokenizerError(
-                    "\(cursor): address \(String(format: "$%.4x", currentAddress)) is out of bounds"
-                )
-            }
-
             if input.takeComment(cursor: &cursor) {
                 input.takeAll(.whitespacesAndNewlines, cursor: &cursor)
                 continue
 
             } else if let (_, code) = input.takeOperation(cursor: &cursor) {
+                guard currentAddress < 65_536 else {
+                    throw AssemblerError.tokenizerError(
+                        "\(cursor): address \(String(format: "$%.4x", currentAddress)) is out of bounds"
+                    )
+                }
+
                 let operation = try input.processOperation(
                     code: code,
                     address: UInt16(currentAddress),
@@ -55,10 +55,22 @@ extension Tokenizer {
                 currentAddress = Int(orgDirective)
 
             } else if let byteDirective = try input.takeByteDirective(defines: defines, cursor: &cursor) {
+                guard currentAddress < 65_536 else {
+                    throw AssemblerError.tokenizerError(
+                        "\(cursor): address \(String(format: "$%.4x", currentAddress)) is out of bounds"
+                    )
+                }
+
                 tokens.append(.byte(byteDirective))
                 currentAddress += 1
 
             } else if let wordDirective = try input.takeWordDirective(defines: defines, cursor: &cursor) {
+                guard currentAddress < 65_535 else {
+                    throw AssemblerError.tokenizerError(
+                        "\(cursor): address \(String(format: "$%.4x", currentAddress)) is out of bounds"
+                    )
+                }
+
                 tokens.append(.word(wordDirective))
                 currentAddress += 2
 

@@ -6,22 +6,10 @@ import PackageDescription
 let package = Package(
     name: "i6502Core",
     products: [
-        .executable(
-            name: "i6502CLI",
-            targets: ["i6502CLI"]
-        ),
-        .library(
-            name: "i6502Assembler",
-            targets: ["i6502Assembler"]
-        ),
-        .library(
-            name: "i6502Emulator",
-            targets: ["i6502Emulator"]
-        ),
-        .library(
-            name: "i6502Specification",
-            targets: ["i6502Specification"]
-        )
+        .executable(name: "i6502CLI", targets: ["i6502CLI"]),
+        .library(name: "i6502Assembler", targets: ["i6502Assembler"]),
+        .library(name: "i6502Emulator", targets: ["i6502Emulator"]),
+        .library(name: "i6502Specification", targets: ["i6502Specification"])
     ],
     targets: [
         .executableTarget(
@@ -37,8 +25,20 @@ let package = Package(
             swiftSettings: [.enableUpcomingFeature("MemberImportVisibility")]
         ),
         .target(
+            name: "i6502CEmulator",
+            path: "Sources/CEmulator",
+            cSettings: [
+                .headerSearchPath("include"),
+                .headerSearchPath("cpu_module"),
+                .headerSearchPath("bus_module"),
+                .headerSearchPath("emu_module"),
+                .unsafeFlags(["-Og"], .when(configuration: .debug)),
+                .unsafeFlags(["-O2"], .when(configuration: .release))
+            ]
+        ),
+        .target(
             name: "i6502Emulator",
-            dependencies: ["i6502Specification"],
+            dependencies: ["i6502Specification", "i6502CEmulator"],
             path: "Sources/Emulator",
             swiftSettings: [.enableUpcomingFeature("MemberImportVisibility")]
         ),

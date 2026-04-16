@@ -1,24 +1,28 @@
 import i6502Assembler
 import i6502Emulator
+import QuartzCore
 import SwiftUI
 
 @Observable
 final class EmulationEngine: @unchecked Sendable {
     private(set) var monitor: [UInt8] = Array(repeating: 0, count: 1_024)
+    private(set) var mhz: Double = 0
+    private(set) var frameMs: Double = 0
 
     private var emulator: Emulator
-    private let cyclesPerFrame = 16_667
+    private let cyclesPerFrame = 35_736
 
     private let queue = DispatchQueue(label: "EmulationEngineQueue", qos: .userInteractive)
     private var timer: DispatchSourceTimer?
 
     init() {
-        emulator = Emulator(emulationMode: .instructionAccurate, devices: [])
+        emulator = Emulator()
     }
 
     func boot(memory: [UInt8?]) {
         queue.async { [self] in
-            emulator = Emulator(memory: memory, emulationMode: .instructionAccurate, devices: [])
+            emulator = Emulator()
+            emulator.write(memory: memory)
             emulator.reset()
             startLoop()
         }
@@ -29,9 +33,7 @@ final class EmulationEngine: @unchecked Sendable {
     }
 
     func pressKey(_ key: UInt8?) {
-        if let key {
-            emulator.state.memory[0xFF] = key
-        }
+        emulator.write(key, at: 0xFF)
     }
 
     func startLoop() {
@@ -40,12 +42,18 @@ final class EmulationEngine: @unchecked Sendable {
         let timer = DispatchSource.makeTimerSource(queue: queue)
         timer.schedule(deadline: .now(), repeating: .milliseconds(16), leeway: .milliseconds(1))
         timer.setEventHandler { [self] in
+            let start = CACurrentMediaTime()
             for _ in 0 ..< cyclesPerFrame {
                 emulator.cycle()
             }
-            let newMonitor = Array(emulator.state.memory[0x200 ... 0x5FF])
+            let elapsed = CACurrentMediaTime() - start
+            let currentMhz = elapsed > 0 ? Double(cyclesPerFrame) / elapsed / 1_000_000 : 0
+
+            let newMonitor = emulator.read(at: 0x200 ..< 0x600)
             DispatchQueue.main.async { [self] in
                 monitor = newMonitor
+                mhz = currentMhz
+                frameMs = elapsed * 1_000
             }
         }
         timer.resume()
@@ -107,6 +115,14 @@ struct EmulatorView: View {
                         maxSampleOffset: CGSize(width: 50, height: 50)
                     )
                 }
+            }
+            .overlay(alignment: .topTrailing) {
+                VStack(alignment: .trailing, spacing: 2) {
+                    Text(String(format: "%.1f MHz / %.1f ms", engine.mhz, engine.frameMs))
+                }
+                .font(.system(.title, design: .monospaced))
+                .foregroundStyle(.green.opacity(0.8))
+                .padding()
             }
             .overlay(alignment: .bottomLeading) {
                 DpadView { engine.pressKey($0) }
