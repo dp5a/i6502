@@ -76,7 +76,7 @@ void aby_rmw_t3(CpuState *state) {
 
 void abx_adc_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adlx = state->address_latch + state->register_x;
+    uint16_t adlx = adl + state->register_x;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adlx & 0xFF);
 
@@ -93,7 +93,7 @@ void abx_adc_t3(CpuState *state) {
 
 void aby_adc_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adly = state->address_latch + state->register_y;
+    uint16_t adly = adl + state->register_y;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adly & 0xFF);
 
@@ -112,7 +112,7 @@ void aby_adc_t3(CpuState *state) {
 
 void abx_and_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adlx = state->address_latch + state->register_x;
+    uint16_t adlx = adl + state->register_x;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adlx & 0xFF);
 
@@ -129,7 +129,7 @@ void abx_and_t3(CpuState *state) {
 
 void aby_and_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adly = state->address_latch + state->register_y;
+    uint16_t adly = adl + state->register_y;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adly & 0xFF);
 
@@ -148,7 +148,7 @@ void aby_and_t3(CpuState *state) {
 
 void abx_cmp_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adlx = state->address_latch + state->register_x;
+    uint16_t adlx = adl + state->register_x;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adlx & 0xFF);
 
@@ -165,7 +165,7 @@ void abx_cmp_t3(CpuState *state) {
 
 void aby_cmp_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adly = state->address_latch + state->register_y;
+    uint16_t adly = adl + state->register_y;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adly & 0xFF);
 
@@ -183,7 +183,7 @@ void aby_cmp_t3(CpuState *state) {
 
 void abx_eor_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adlx = state->address_latch + state->register_x;
+    uint16_t adlx = adl + state->register_x;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adlx & 0xFF);
 
@@ -200,7 +200,7 @@ void abx_eor_t3(CpuState *state) {
 
 void aby_eor_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adly = state->address_latch + state->register_y;
+    uint16_t adly = adl + state->register_y;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adly & 0xFF);
 
@@ -219,7 +219,7 @@ void aby_eor_t3(CpuState *state) {
 
 void abx_lda_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adlx = state->address_latch + state->register_x;
+    uint16_t adlx = adl + state->register_x;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adlx & 0xFF);
 
@@ -237,7 +237,7 @@ void abx_lda_t3(CpuState *state) {
 
 void aby_lda_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adly = state->address_latch + state->register_y;
+    uint16_t adly = adl + state->register_y;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adly & 0xFF);
 
@@ -257,7 +257,7 @@ void aby_lda_t3(CpuState *state) {
 
 void abx_ldy_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adlx = state->address_latch + state->register_x;
+    uint16_t adlx = adl + state->register_x;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adlx & 0xFF);
 
@@ -275,7 +275,7 @@ void abx_ldy_t3(CpuState *state) {
 
 void aby_ldx_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adly = state->address_latch + state->register_y;
+    uint16_t adly = adl + state->register_y;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adly & 0xFF);
 
@@ -295,7 +295,7 @@ void aby_ldx_t3(CpuState *state) {
 
 void abx_ora_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adlx = state->address_latch + state->register_x;
+    uint16_t adlx = adl + state->register_x;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adlx & 0xFF);
 
@@ -312,7 +312,7 @@ void abx_ora_t3(CpuState *state) {
 
 void aby_ora_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adly = state->address_latch + state->register_y;
+    uint16_t adly = adl + state->register_y;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adly & 0xFF);
 
@@ -330,7 +330,7 @@ void aby_ora_t3(CpuState *state) {
 
 void abx_sbc_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adlx = state->address_latch + state->register_x;
+    uint16_t adlx = adl + state->register_x;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adlx & 0xFF);
 
@@ -347,7 +347,7 @@ void abx_sbc_t3(CpuState *state) {
 
 void aby_sbc_t3(CpuState *state) {
     uint16_t adl = state->address_latch & 0xFF;
-    uint16_t adly = state->address_latch + state->register_y;
+    uint16_t adly = adl + state->register_y;
 
     state->address_latch = (state->address_latch & 0xFF00) | (adly & 0xFF);
 

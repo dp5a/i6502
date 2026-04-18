@@ -60,9 +60,20 @@ void emu_cycle(EmulatorState *state) {
     } else {
         if (state->nmi_pending) {
             state->nmi_pending = false;
-            cpu_nmi(state->cpu);
+            state->cpu_cycles = cpu_nmi(state->cpu);
+            state->cpu_cycles_index = 0;
+
+            CpuAction cpu_action = state->cpu_cycles.actions[state->cpu_cycles_index];
+            cpu_action(state->cpu);
+            state->cpu_cycles_index++;
         } else if (state->irq_pending && !(state->cpu->register_ps & I_MASK)) {
-            cpu_irq(state->cpu);
+            state->cpu_cycles = cpu_irq(state->cpu);
+            state->cpu_cycles_index = 0;
+
+            CpuAction cpu_action = state->cpu_cycles.actions[state->cpu_cycles_index];
+            cpu_action(state->cpu);
+            state->cpu_cycles_index++;
+
         } else {
             state->cpu_cycles = cpu_decode(state->cpu);
             state->cpu_cycles_index = 0;
@@ -78,6 +89,10 @@ uint8_t emu_read(EmulatorState *state, uint16_t address) {
 
 void emu_write(EmulatorState *state, uint16_t address, uint8_t value) {
     bus_write(state->bus, address, value);
+}
+
+void emu_set_pc(EmulatorState *state, uint16_t address) {
+    state->cpu->register_pc = address;
 }
 
 void emu_irq_line(EmulatorState *state, bool is_on) {

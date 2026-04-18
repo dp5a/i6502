@@ -56,27 +56,27 @@ jmp (routine_ref) ; will be resolved to address $1000
 
 ### Emulator
 
-6502 state machine interpreter / emulator
+Implements cycle-accurate 6502 state machine interpreter / emulator. Passes [nestest](https://github.com/christopherpow/nes-test-roms/tree/master) up to line 5003 (next are illegal opcodes, might support them later)
 
-Currently implemented an instruction-accurate emulation (all read-write-page_cross actions happen in one cpu cycle, then execution idles N-1 cycles)
-
-All memory and registers are filled with random bytes upon initialization, reset and interrupts are properly emulated by routing execution to according addresses at $FFFA-$FFFF
+All memory and registers are filled with random bytes upon initialization, reset and interrupts are properly emulated by routing execution to according addresses at vector section
 
 <details>
   <summary>How to use?</summary>
 
+All emulation logic is written in C both for perfomance and fun purposes, but exposed only as Swift facade package:
 ```Swift
-// get 64KiB memory image from assembler
+import i6502Emulator
+
+// get 64KiB memory image
 let memory: [UInt8?] = try Assembler.compileBytes(input: "...")
 
-// initailize emulator
-var emulator = Emulator(
-    memory: memory,
-    devices: [...]
-)
+// turn power supply to device
+let emulator = Emulator()
 
-// signal RESET to cpu
-emulator.reset()
+// load memory and run RESET
+emulator.boot(memory: memory)
+
+// run cpu cycle by cycle
 while true {
     emulator.cycle()
 }
@@ -108,7 +108,7 @@ while true {
 
 ## i6502App
 
-i6502 app is featuring a live-reload 6502 assembly editor optimized for iPad and MacOS:
+i6502 app is currently featuring two tabs: a live-reload assembly editor and emulator with monitor and dpad, reset and boot controlls. Same program data is shared between those and supplied to imaginary device after pressing "boot" or "reset"
 
 ![Editor example](Resources/snake.gif)
 
@@ -116,7 +116,7 @@ i6502 app is featuring a live-reload 6502 assembly editor optimized for iPad and
 * Dismissable hexdump inspector
 * Syntax highlight
 * Font size control
-* Light and dark themes
+* Tiny number of themes
 
 ### Emulator tab features:
 * Tiny monochrome CRT 32x32 monitor
@@ -129,7 +129,8 @@ i6502 app is featuring a live-reload 6502 assembly editor optimized for iPad and
 ## Useful links
 
 * [Easy 6502](https://skilldrick.github.io/easy6502/) - smooth and short introduction to 6502 plus VERY useful playground
-* [6502.org](https://www.6502.org/tutorials/6502opcodes.html) - table of official operation codes with comprehensive description
+* [6502.org](https://www.6502.org/tutorials/6502opcodes.html) - list of official operation codes with comprehensive description
+* [masswerk.at](https://www.masswerk.at/6502/6502_instruction_set.html) - instruction set of all commands organized in table
 * [obelisk.me.uk](https://web.archive.org/web/20210626024532/http://www.obelisk.me.uk/6502/registers.html) - brief description of 6502 CPU registers
 * [emulationonline.com](https://www.emulationonline.com/systems/nes/) - series of articles about NES emulation that based on 6502 architecture
 * [nesdev.org](https://www.nesdev.org/wiki/NES_reference_guide) - NES-related wiki 

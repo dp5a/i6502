@@ -39,7 +39,7 @@ CpuCycles cpu_nmi(CpuState *state) {
 
 CpuCycles cpu_reset(CpuState *state) {
     state->register_ps |= I_MASK;
-    state->register_ps = 0xFD;
+    state->register_sp = 0xFD;
     state->page_crossed = false;
     return (CpuCycles){
         .actions = { reset_t0, reset_t1, reset_t2, reset_t3, reset_t4, reset_t5, reset_t6 },
@@ -612,31 +612,31 @@ CpuCycles cpu_decode(CpuState *state) {
         /* MARK: Indirect X operations */
         case 0x61: return (CpuCycles){ /* adc ($nn,x) */
             .actions = { zp_t1, zpx_t2, ind_t3, inx_t4, com_adc },
-            .count = 4
+            .count = 5
         };
         case 0x21: return (CpuCycles){ /* and ($nn,x) */
             .actions = { zp_t1, zpx_t2, ind_t3, inx_t4, com_and },
-            .count = 4
+            .count = 5
         };
         case 0xC1: return (CpuCycles){ /* cmp ($nn,x) */
             .actions = { zp_t1, zpx_t2, ind_t3, inx_t4, com_cmp },
-            .count = 4
+            .count = 5
         };
         case 0x41: return (CpuCycles){ /* eor ($nn,x) */
             .actions = { zp_t1, zpx_t2, ind_t3, inx_t4, com_eor },
-            .count = 4
+            .count = 5
         };
         case 0xA1: return (CpuCycles){ /* lda ($nn,x) */
             .actions = { zp_t1, zpx_t2, ind_t3, inx_t4, com_lda },
-            .count = 4
+            .count = 5
         };
         case 0x01: return (CpuCycles){ /* ora ($nn,x) */
             .actions = { zp_t1, zpx_t2, ind_t3, inx_t4, com_ora },
-            .count = 4
+            .count = 5
         };
         case 0xE1: return (CpuCycles){ /* sbc ($nn,x) */
             .actions = { zp_t1, zpx_t2, ind_t3, inx_t4, com_sbc },
-            .count = 4
+            .count = 5
         };
         case 0x81: return (CpuCycles){ /* sta ($nn,x) */
             .actions = { zp_t1, zpx_t2, ind_t3, inx_t4, com_sta },

@@ -1,6 +1,6 @@
 import i6502CEmulator
 
-/* Emualtor facade for Swift API */
+/* Emulator facade for Swift API */
 public class Emulator {
     private var state: OpaquePointer
 
