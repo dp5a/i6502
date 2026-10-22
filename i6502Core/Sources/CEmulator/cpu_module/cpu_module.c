@@ -675,6 +675,6 @@ CpuCycles cpu_decode(CpuState *state) {
             .actions = { zp_t1, iny_t2, iny_t3, iny_sta_t4, iny_sta_t5 },
             .count = 5
         };
+        default: return (CpuCycles){ .count = 0 };
     }
-    return (CpuCycles){ .count = 0 };
 }

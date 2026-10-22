@@ -1,11 +1,33 @@
+import Foundation
 import i6502CEmulator
 
 /* Emulator facade for Swift API */
 public class Emulator {
-    private var state: OpaquePointer
+    public struct NESButton: OptionSet, Sendable {
+        public let rawValue: UInt8
+        public init(rawValue: UInt8) { self.rawValue = rawValue }
 
-    public init() {
-        state = emu_create()
+        public static let a = NESButton(rawValue: 1 << 0)
+        public static let b = NESButton(rawValue: 1 << 1)
+        public static let select = NESButton(rawValue: 1 << 2)
+        public static let start = NESButton(rawValue: 1 << 3)
+        public static let up = NESButton(rawValue: 1 << 4)
+        public static let down = NESButton(rawValue: 1 << 5)
+        public static let left = NESButton(rawValue: 1 << 6)
+        public static let right = NESButton(rawValue: 1 << 7)
+    }
+
+    public func setController(_ buttons: NESButton, player: UInt8 = 0) {
+        emu_set_controller(state, player, buttons.rawValue)
+    }
+
+    private var state: OpaquePointer
+    private let game_ptr: UnsafeMutablePointer<UInt8>
+
+    public init(rom: Data) {
+        game_ptr = UnsafeMutablePointer.allocate(capacity: rom.count)
+        rom.copyBytes(to: game_ptr, count: rom.count)
+        state = emu_create(game_ptr, UInt32(rom.count))
     }
 
     public func boot(memory: [UInt8?]) {
@@ -47,6 +69,10 @@ public class Emulator {
         for (address, value) in memory.enumerated() {
             write(value, at: UInt16(address))
         }
+    }
+
+    public func framebuffer() -> [UInt32] {
+        Array(UnsafeBufferPointer(start: emu_framebuffer(state), count: 256 * 240))
     }
 
     deinit {

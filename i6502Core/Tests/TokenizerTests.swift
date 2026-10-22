@@ -229,7 +229,7 @@ struct TokenizerTests {
 
     @Test("\".byte\" failing out of bounds")
     func byteFailingOutOfBounds() {
-        #expect(throws: AssemblerError.tokenizerError("(2:2): address $10000 is out of bounds")) {
+        #expect(throws: AssemblerError.tokenizerError("(2:11): address $10000 is out of bounds")) {
             try Tokenizer.process(
                 input: """
                 .org $FFFF
@@ -1126,7 +1126,7 @@ struct TokenizerTests {
 
     @Test("\"misc\" failing too long program")
     func miscFailingTooLong() {
-        #expect(throws: AssemblerError.tokenizerError("(65536:0): address $10000 is out of bounds")) {
+        #expect(throws: AssemblerError.tokenizerError("(65536:3): address $10000 is out of bounds")) {
             try Tokenizer.process(
                 input: Array(repeating: "nop", count: 65_537).joined(separator: "\n")
             )

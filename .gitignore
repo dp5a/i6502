@@ -1,5 +1,6 @@
 # SPM
 .build/
+.swiftpm/
 Package.resolved
 
 # Xcode & VSCode
@@ -7,6 +8,9 @@ project.xcworkspace/
 xcshareddata/
 xcuserdata/
 .vscode/
+
+# nes LEGALLY obtained roms
+*.nes
 
 # etc
 .DS_Store

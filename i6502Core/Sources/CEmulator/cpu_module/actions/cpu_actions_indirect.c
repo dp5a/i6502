@@ -49,89 +49,98 @@ void iny_t3(CpuState *state) {
     uint16_t pcly = pcl + state->register_y;
 
     state->address_latch = (pch << 8) | (pcly & 0xFF);
-    if (pcly >= 0x100) {
-        state->page_crossed = true;
-    }
 }
 
 void iny_adc_t4(CpuState *state) {
     uint8_t operand = bus_read(state->bus, state->address_latch);
+    uint16_t pcly = (uint16_t)state->data_latch + state->register_y;
 
-    if (!state->page_crossed) {
-        apply_adc(state, operand);
-    } else {
+    if (pcly >= 0x100) {
         state->address_latch += 0x100;
+        state->page_crossed = true;
+    } else {
+        apply_adc(state, operand);
     }
 }
 
 void iny_and_t4(CpuState *state) {
     uint8_t operand = bus_read(state->bus, state->address_latch);
+    uint16_t pcly = (uint16_t)state->data_latch + state->register_y;
 
-    if (!state->page_crossed) {
-        apply_and(state, operand);
-    } else {
+    if (pcly >= 0x100) {
         state->address_latch += 0x100;
+        state->page_crossed = true;
+    } else {
+        apply_and(state, operand);
     }
 }
 
 void iny_cmp_t4(CpuState *state) {
     uint8_t operand = bus_read(state->bus, state->address_latch);
+    uint16_t pcly = (uint16_t)state->data_latch + state->register_y;
 
-    if (!state->page_crossed) {
-        apply_cmp(state, state->register_a, operand);
-    } else {
+    if (pcly >= 0x100) {
         state->address_latch += 0x100;
+        state->page_crossed = true;
+    } else {
+        apply_cmp(state, state->register_a, operand);
     }
 }
 
 void iny_eor_t4(CpuState *state) {
     uint8_t operand = bus_read(state->bus, state->address_latch);
+    uint16_t pcly = (uint16_t)state->data_latch + state->register_y;
 
-    if (!state->page_crossed) {
-        apply_eor(state, operand);
-    } else {
+    if (pcly >= 0x100) {
         state->address_latch += 0x100;
+        state->page_crossed = true;
+    } else {
+        apply_eor(state, operand);
     }
 }
 
 void iny_lda_t4(CpuState *state) {
     uint8_t operand = bus_read(state->bus, state->address_latch);
+    uint16_t pcly = (uint16_t)state->data_latch + state->register_y;
 
-    if (!state->page_crossed) {
+    if (pcly >= 0x100) {
+        state->address_latch += 0x100;
+        state->page_crossed = true;
+    } else {
         state->register_a = operand;
         apply_nz(state, operand);
-    } else {
-        state->address_latch += 0x100;
     }
 }
 
 void iny_ora_t4(CpuState *state) {
     uint8_t operand = bus_read(state->bus, state->address_latch);
+    uint16_t pcly = (uint16_t)state->data_latch + state->register_y;
 
-    if (!state->page_crossed) {
-        apply_ora(state, operand);
-    } else {
+    if (pcly >= 0x100) {
         state->address_latch += 0x100;
+        state->page_crossed = true;
+    } else {
+        apply_ora(state, operand);
     }
 }
 
 void iny_sbc_t4(CpuState *state) {
     uint8_t operand = bus_read(state->bus, state->address_latch);
+    uint16_t pcly = (uint16_t)state->data_latch + state->register_y;
 
-    if (!state->page_crossed) {
-        apply_sbc(state, operand);
-    } else {
+    if (pcly >= 0x100) {
         state->address_latch += 0x100;
+        state->page_crossed = true;
+    } else {
+        apply_sbc(state, operand);
     }
 }
 
 void iny_sta_t4(CpuState *state) {
     (void)bus_read(state->bus, state->address_latch);
+    uint16_t pcly = (uint16_t)state->data_latch + state->register_y;
 
-    uint16_t adl = state->data_latch;
-    uint16_t adly = adl + state->register_y;
-
-    if (adly >= 0x100) {
+    if (pcly >= 0x100) {
         state->address_latch += 0x100;
     }
 }

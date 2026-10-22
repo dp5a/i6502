@@ -8,7 +8,7 @@
 typedef struct EmuState EmulatorState;
 
 /* Emulator initializer & deinitializer */
-EmulatorState * emu_create();
+EmulatorState * emu_create(uint8_t *rom_data, uint32_t size);
 void emu_destroy(EmulatorState *state);
 
 /* Emulator actions */
@@ -18,6 +18,9 @@ void emu_cycle(EmulatorState *state);
 /* Emulator exposed logic */
 uint8_t emu_read(EmulatorState *state, uint16_t address);
 void emu_write(EmulatorState *state, uint16_t address, uint8_t value);
+
+void emu_set_controller(EmulatorState *state, uint8_t controller, uint8_t buttons);
+uint32_t * emu_framebuffer(EmulatorState *state);
 
 void emu_set_pc(EmulatorState *state, uint16_t address);
 void emu_irq_line(EmulatorState *state, bool is_on);

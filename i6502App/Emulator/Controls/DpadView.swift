@@ -1,11 +1,13 @@
 import SwiftUI
+import i6502Emulator
 
 struct DpadView: View {
     @AppStorage("AppTheme") private var appTheme: AppTheme = .defaultDark
 
     @State private var pressPoint: CGPoint = .zero
     @State private var isPressed: Bool = false
-    let onTap: (UInt8) -> Void
+    let onPress: (Emulator.NESButton) -> Void
+    let onRelease: () -> Void
 
     var body: some View {
         GeometryReader { proxy in
@@ -49,20 +51,27 @@ struct DpadView: View {
                         pressPoint = value.location
                         isPressed = true
 
-                        let third = proxy.size.width / 3
+                        let thirdW = proxy.size.width / 3
+                        let thirdH = proxy.size.height / 3
+                        let x = value.location.x
+                        let y = value.location.y
 
-                        if (0 ... third).contains(value.location.y) {
-                            onTap(0x77) // up
-                        } else if (2 * third ... proxy.size.width).contains(value.location.x) {
-                            onTap(0x64) // right
-                        } else if (2 * third ... proxy.size.height).contains(value.location.y) {
-                            onTap(0x73) // down
-                        } else if (0 ... third).contains(value.location.x) {
-                            onTap(0x61) // left
+                        let inCenterColumn = (thirdW...2*thirdW).contains(x)
+                        let inCenterRow    = (thirdH...2*thirdH).contains(y)
+
+                        if inCenterColumn && y < thirdH {
+                            onPress(.up)
+                        } else if inCenterColumn && y > 2 * thirdH {
+                            onPress(.down)
+                        } else if inCenterRow && x > 2 * thirdW {
+                            onPress(.right)
+                        } else if inCenterRow && x < thirdW {
+                            onPress(.left)
                         }
                     }
                     .onEnded { _ in
                         isPressed = false
+                        onRelease()
                     }
             )
             .shadow(radius: 10)
@@ -77,7 +86,7 @@ struct DpadView: View {
     ZStack {
         appTheme.palette.backgroundPrimary.ignoresSafeArea()
 
-        DpadView(onTap: { _ in })
+        // DpadView(onTap: { _ in })
             .frame(width: 400, height: 400)
         // .border(.red)
     }

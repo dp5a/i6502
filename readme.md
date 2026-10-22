@@ -1,6 +1,6 @@
 # imaginary 6502
 
-A very basic imaginary computer with imaginary [MOS 6502](https://en.wikipedia.org/wiki/MOS_Technology_6502) in it
+Series of emulated computers with imaginary [MOS 6502](https://en.wikipedia.org/wiki/MOS_Technology_6502) in them
 
 ![Simulator demo](Resources/demo.png)
 
@@ -56,7 +56,7 @@ jmp (routine_ref) ; will be resolved to address $1000
 
 ### Emulator
 
-Implements cycle-accurate 6502 state machine interpreter / emulator. Passes [nestest](https://github.com/christopherpow/nes-test-roms/tree/master) up to line 5003 (next are illegal opcodes, might support them later)
+Emulates NES's CPU, PPU, APU (tbd), bus and controllers. Passes [nestest](https://github.com/christopherpow/nes-test-roms/tree/master) up to line 5003 (next are illegal opcodes, might support them later)
 
 All memory and registers are filled with random bytes upon initialization, reset and interrupts are properly emulated by routing execution to according addresses at vector section
 
